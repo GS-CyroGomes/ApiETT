@@ -1,0 +1,70 @@
+services:
+  php56_apache2:
+    build:
+      context: ./php56
+      dockerfile: Dockerfile
+    container_name: php56_apache2
+    image: php56:latest
+    ports:
+      - "56109:80"
+    depends_on:
+      - mysql
+    volumes:
+      - type: bind
+        source: ./php56/config/php.ini
+        target: /usr/local/etc/php.ini
+        read_only: true
+      - type: bind
+        source: ./php56/config/apache2.conf
+        target: /etc/apache2/apache2.conf
+        read_only: true
+      - type: bind
+        source: ./php56/src
+        target: /var/www/html
+        read_only: true
+      - type: bind
+        source: ./logs/apache2
+        target: /var/log/apache2
+      - type: bind
+        source: ./logs/php56/php_errors.log
+        target: /var/log/php_errors.log
+    env_file:
+      - "./php56/config/.env"
+    networks:
+      vpnApiETT:
+        ipv4_address: 10.0.0.17
+    restart: unless-stopped
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: mysql
+    platform: linux/x86_64
+    image: mysql_custom:8.0.36
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 13459:3306
+    env_file:
+      - "./mysql/config/.env"
+    volumes:
+      - ./mysql/config/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/scripts:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+      - type: bind
+        source: ./logs/mysql
+        target: /var/log/mysql
+    networks:
+      vpnApiETT:
+        ipv4_address: 10.0.0.12
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+
+networks:
+  vpnApiETT:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/16
+         gateway: 10.0.0.1

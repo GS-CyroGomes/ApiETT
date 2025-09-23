@@ -1,0 +1,23 @@
+{
+    "require": {
+      "guzzlehttp/guzzle": "^6.3",
+      "firebase/php-jwt": "^5.0",
+      "ramsey/uuid": "^3.8",
+      "respect/validation": "^1.1",
+      "monolog/monolog": "^1.25",
+      "doctrine/dbal": "2.5.*",
+      "vlucas/phpdotenv": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+          "App\\": "app/",
+          "Config\\": "config/",
+          "Public\\": "public/"
+        }
+    },
+    "config": {
+      "platform": {
+        "php": "5.6.40"
+      }
+    }
+}
