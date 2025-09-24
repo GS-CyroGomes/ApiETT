@@ -1,14 +1,29 @@
-# /var/www/html/temora_api/.htaccess
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /apiTemoraETT/
 
-    # Base do projeto (pasta onde a API está)
-    RewriteBase /temora_api/
-
-    # Não reescreve se for arquivo ou pasta existente
+    # Se não for arquivo nem diretório existente
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
-    # Tudo mais vai para index.php como parâmetro "url"
-    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+    # Redireciona tudo para a pasta public/index.php
+    RewriteRule ^(.*)$ public/index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    # Ativa o motor de reescrita de URL
+    RewriteEngine On
+
+    # Define o caminho base para as regras.
+    # Isso é importante se a sua API não estiver na raiz do domínio.
+    RewriteBase /apiTemoraETT/
+
+    # Se a requisição NÃO for para um arquivo existente...
+    RewriteCond %{REQUEST_FILENAME} !-f
+    # ...E também NÃO for para um diretório existente...
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # ...Então, reescreve a URL para o seu "front controller" em /public
+    # O que for solicitado na URL será tratado pelo seu index.php
+    RewriteRule ^(.*)$ public/index.php [L,QSA]
 </IfModule>

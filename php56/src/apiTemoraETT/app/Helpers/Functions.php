@@ -1,5 +1,6 @@
 <?php
 namespace App\Helpers;
+use ReflectionMethod;
 
 class Helper
 {
@@ -23,6 +24,55 @@ class Helper
         $valor = trim($valor);
 
         return $valor;
+    }
+    
+    /**
+     * Exibe a mensagem de erro e finaliza a requisição
+     */
+    public static function emitirErro($mensagem, $statusCode = "400 Bad Request"){
+        if (is_array($mensagem)) { $mensagem = implode('; ', $mensagem); }
+        $mensagem = ["erro" => $mensagem];
+        
+        self::finalizarRequisicao($mensagem, $statusCode);
+        exit;
+    }
+
+    /**
+     * Finaliza a requisição com o código de status e a mensagem
+    */
+    public static function finalizarRequisicao(
+        $msg = '',
+        $statusCode = null
+    ) {
+        header("HTTP/1.1 $statusCode");
+        self::echoFormatted($msg);
+        exit;
+    }
+
+    /**
+     * Verifica se o JSON é válido, caso não seja, exibe a mensagem de erro
+    */
+    public static function verificarErroJson($json)
+    {
+        $erros = array(
+            JSON_ERROR_NONE => null,
+            JSON_ERROR_DEPTH => 'Maximum stack depth exceeded',
+            JSON_ERROR_STATE_MISMATCH => 'Underflow or the modes mismatch',
+            JSON_ERROR_CTRL_CHAR => 'Unexpected control character found',
+            JSON_ERROR_SYNTAX => 'Syntax error, malformed JSON',
+            JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded',
+        );
+
+        $codigoErro = json_last_error();
+        
+        if ($codigoErro !== JSON_ERROR_NONE) {
+            $jsonError = ["JSON_ERROR_NONE", "JSON_ERROR_DEPTH", "JSON_ERROR_STATE_MISMATCH", "JSON_ERROR_CTRL_CHAR", "JSON_ERROR_SYNTAX", "JSON_ERROR_UTF8"];
+            self::emitirErro([
+                'message' => sprintf("Erro %s %s", $jsonError[$codigoErro], $erros[$codigoErro]),
+            ], "400 Bad Request");
+        }
+
+        return ['data' => $json];
     }
 
     /**
@@ -163,6 +213,11 @@ class Helper
 
         openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA256);
         return self::base64Encode($signature);
+    }
+
+    public static function listParametersClassFunction($class, $function){
+        $ref = new ReflectionMethod($class, $function);
+        return $ref->getParameters();
     }
 
     /**

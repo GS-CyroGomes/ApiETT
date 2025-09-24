@@ -14,26 +14,63 @@ A API é construída sobre uma arquitetura de contêineres Docker, utilizando:
 
 ```
 .
-├── .vscode/           # Configurações do VS Code
-├── logs/              # Logs da aplicação e banco de dados
-├── mysql/             # Configurações do MySQL
-│   ├── config/        # Arquivos de configuração do MySQL
-│   └── scripts/       # Scripts SQL para inicialização do banco
-├── php56/             # Aplicação PHP
-│   ├── config/        # Configurações do PHP e Apache
-│   └── src/           # Código-fonte da aplicação
-│       └── apiTemoraETT/
-│           ├── Core/      # Classes principais
-│           ├── Models/    # Modelos de dados
-│           ├── .htaccess  # Configurações do Apache
-│           ├── connection.php # Classe de conexão com o banco
-│           ├── functions.php  # Funções auxiliares
-│           ├── index.php      # Ponto de entrada da API
-│           └── pessoa.php     # Endpoint de exemplo para pessoa
-├── .gitignore         # Arquivos ignorados pelo Git
-├── compose.yml        # Configuração do Docker Compose
-└── tools.sh           # Scripts úteis para desenvolvimento
+├── .vscode/                     # Configurações do VS Code
+├── logs/                        # Logs da aplicação e banco de dados
+│   ├── apache2/                 # Logs do servidor Apache
+│   ├── mysql/                   # Logs do MySQL
+│   └── php56/                   # Logs do PHP
+├── mysql/                       # Configurações do MySQL
+│   ├── config/                  # Arquivos de configuração do MySQL
+│   │   └── my.cnf               # Configuração personalizada do MySQL
+│   ├── scripts/                 # Scripts SQL para inicialização do banco
+│   │   └── ddl.sql              # Script de criação do banco de dados
+│   └── Dockerfile               # Configuração da imagem Docker do MySQL
+├── php56/                       # Aplicação PHP
+│   ├── config/                  # Configurações do ambiente
+│   │   ├── apache2.conf         # Configuração do Apache
+│   │   ├── php.ini              # Configuração do PHP
+│   │   └── xdebug.ini           # Configuração do Xdebug
+│   ├── src/                     # Código-fonte da aplicação
+│   │   └── apiTemoraETT/        # Raiz do projeto PHP
+│   │       ├── app/             # Código da aplicação
+│   │       │   ├── Controllers/ # Controladores da aplicação
+│   │       │   ├── Core/        # Classes principais do framework
+│   │       │   ├── Helpers/     # Funções auxiliares
+│   │       │   ├── Middlewares/ # Middlewares da aplicação
+│   │       │   └── Models/      # Modelos de dados
+│   │       ├── config/          # Configurações da aplicação
+│   │       │   └── Database.php # Configuração do banco de dados
+│   │       ├── public/          # Pasta pública
+│   │       │   └── index.php    # Ponto de entrada da aplicação
+│   │       ├── vendor/          # Dependências do Composer
+│   │       ├── .htaccess        # Configurações do Apache
+│   │       ├── composer.json    # Definição das dependências PHP
+│   │       └── composer.lock    # Versões travadas das dependências
+│   └── Dockerfile               # Configuração da imagem Docker do PHP
+├── .dockerignore                # Arquivos ignorados pelo Docker
+├── .gitignore                   # Arquivos ignorados pelo Git
+├── compose.yml                  # Configuração do Docker Compose
+└── tools.sh                     # Scripts úteis para desenvolvimento
 ```
+
+## 📦 Gerenciamento de Dependências (Composer)
+
+O projeto utiliza o Composer para gerenciar as dependências PHP. As principais bibliotecas utilizadas são:
+
+- **guzzlehttp/guzzle** (^6.3) - Cliente HTTP para fazer requisições a serviços externos
+- **firebase/php-jwt** (^5.0) - Implementação de JSON Web Tokens (JWT) para autenticação
+- **ramsey/uuid** (^3.8) - Geração de UUIDs (Identificadores Únicos Universais)
+- **respect/validation** (^1.1) - Biblioteca de validação de dados
+- **monolog/monolog** (^1.25) - Biblioteca de logging
+- **doctrine/dbal** (2.5.*) - Camada de abstração de banco de dados
+- **vlucas/phpdotenv** (^2.5) - Carregamento de variáveis de ambiente a partir de arquivos .env
+
+### Comandos úteis do Composer
+
+- Instalar dependências: `composer install`
+- Atualizar dependências: `composer update`
+- Ver dependências instaladas: `composer show`
+- Atualizar o autoloader: `composer dump-autoload`
 
 ## Observação
 .vscode/ é para configuração do vscode para debugar
@@ -120,10 +157,7 @@ O banco de dados é inicializado automaticamente com os scripts SQL localizados 
 
 ### Estrutura de Arquivos
 
-- **connection.php**: Classe responsável por gerenciar a conexão com o banco de dados.
-- **functions.php**: Funções auxiliares para manipulação de strings, codificação e formatação de respostas JSON.
-- **index.php**: Ponto de entrada principal da API, responsável por rotear as requisições.
-- **pessoa.php**: Exemplo de endpoint para manipulação de dados de pessoas.
+
 
 ### Padrões de Código
 

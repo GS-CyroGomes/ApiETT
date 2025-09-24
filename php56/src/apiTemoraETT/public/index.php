@@ -1,31 +1,33 @@
 <?php
+    // date_default_timezone_set('America/Sao_Paulo');
     require __DIR__ . '/../vendor/autoload.php';
-    require_once __DIR__ . '/../app/Helpers/Functions.php';
-    
-    use Config\Database;
-    use App\Helpers\Helper;
+
+    // use App\Core\Router;
 
     class TemoraApi {
-        private $conn;
         public $bodyRequest;
 
         public function __construct() {
-            $this->connection();
+            $this->bodyRequest = json_decode(file_get_contents('php://input'));
+            var_dump($this->bodyRequest);
+            return $this->bodyRequest;
+            // $router = new Router();
             
-            // list($rota, $parametros) = $this->bindFunctionArgs($_GET['url']);
-            // $json = json_decode(file_get_contents("php://input"), true);
-            // $json = array_map('gCleanField', $json);
-            // if (!verificarErroJson($json)) { $this->bodyRequest = $json; }
-            // $this->callRoute($rota, $parametros);
-        }
+            // // Grupo de rotas para usuários
+            // $router->group('/usuarios', function($route) {
+            //     $route->post('/cadastro', 'App\Controllers\UserController@register');
+            //     $route->get ('/listar',   'App\Controllers\UserController@index');
+            //     $route->put ('/editar',   'App\Controllers\UserController@update');
+            //     $route->delete('/excluir','App\Controllers\UserController@delete');
+            // });
 
-        public function connection(){
-            try{
-                $db = new Database();
-                $this->conn = $db->getConnection();
-            }catch(Exception $e){
-                Helper::emitirErro($e->getMessage());
-            }
+            // // Você pode ter outros grupos independentes
+            // $router->group('/auth', function($route) {
+            //     $route->post('/login', 'App\Controllers\AuthController@login');
+            //     $route->post('/logout','App\Controllers\AuthController@logout');
+            // });
+
+            // $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
         }
     }
 

@@ -6,7 +6,8 @@
       "respect/validation": "^1.1",
       "monolog/monolog": "^1.25",
       "doctrine/dbal": "2.5.*",
-      "vlucas/phpdotenv": "^2.5"
+      "vlucas/phpdotenv": "^2.5",
+      "fzaninotto/faker": "~1.9"
     },
     "autoload": {
         "psr-4": {

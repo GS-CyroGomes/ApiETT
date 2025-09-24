@@ -28,6 +28,9 @@ services:
       - type: bind
         source: ./logs/php56/php_errors.log
         target: /var/log/php_errors.log
+      - type: bind
+        source: ./php56/config/apiTemoraETT.conf
+        target: /etc/apache2/sites-available/apiTemoraETT.conf
     env_file:
       - "./php56/config/.env"
     networks:
@@ -47,12 +50,17 @@ services:
     env_file:
       - "./mysql/config/.env"
     volumes:
-      - ./mysql/config/my.cnf:/etc/mysql/conf.d/my.cnf:ro
-      - ./mysql/scripts:/docker-entrypoint-initdb.d
-      - mysql-data:/var/lib/mysql
+      - type: bind
+        source: ./mysql/config/my.cnf
+        target: /etc/mysql/conf.d/my.cnf
+        read_only: true
+      - type: bind
+        source: ./mysql/scripts
+        target: /docker-entrypoint-initdb.d
       - type: bind
         source: ./logs/mysql
         target: /var/log/mysql
+      - mysql-data:/var/lib/mysql
     networks:
       vpnApiETT:
         ipv4_address: 10.0.0.12

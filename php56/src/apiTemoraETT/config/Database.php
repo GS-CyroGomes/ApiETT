@@ -23,7 +23,7 @@ class Database
         $this->connection = DriverManager::getConnection($connectionParams);
     }
 
-    public function getConnection()
+    private function getConnection()
     {
         return $this->connection;
     }
