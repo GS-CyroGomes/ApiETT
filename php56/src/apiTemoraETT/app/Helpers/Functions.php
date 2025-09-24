@@ -234,4 +234,16 @@ class Helper
         $AESKEY = "TemoraETT";
         return 'CAST(AES_DECRYPT(UNHEX(' . $nomeCampo . '),"' . $AESKEY . '") AS CHAR(150))';
     }
+
+    public static function validateRequiredFields($bodyRequest, $requiredArguments)
+    {
+        foreach ($requiredArguments as $value) {
+            if (!array_key_exists($value, $bodyRequest)) {
+                self::emitirErro("Argumento obrigatório: {$value}", 422);
+            }
+            if (empty($bodyRequest[$value])) {
+                self::emitirErro("Argumento {$value} obrigatório não pode ser vazio ", 422);
+            }
+        }
+    }
 }

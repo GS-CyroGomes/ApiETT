@@ -3,28 +3,24 @@ namespace App\Controllers;
 
 require_once __DIR__ . '/../Helpers/Functions.php';
 
-use Config\Database;
-use App\Helpers\Helper;
-use App\Models\User;
-use App\Models\Person;
-
-class UserController
+class PersonController
 {
-    private $User;
-
+    public $Person;
     public function __construct() {
-        $this->User = new User();
+        $this->Person = new Person();
+    }
+
+    public function index()
+    {
+        echo "PersonController";
     }
     
     public function register($arguments)
     {
         Helper::validateRequiredFields($arguments, ['nome', 'data_nascimento', 'rg', 'cpf', 'orgao_emissor', 'uf_emissor', 'senha']);        
-        
-        $this->User->cadastrar($arguments);
+        $this->Person->cadastrar($arguments);
         // Helper::finalizarRequisicao($arguments);
     }
-
-    private function returnError($message, $statusCode){
-        Helper::emitirErro($message, $statusCode);
-    }
 }
+
+?>

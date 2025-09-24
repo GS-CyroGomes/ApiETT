@@ -66,19 +66,7 @@ class Router
         list($class, $func) = explode('@', $this->routes[$method][$path]);
         $controller = new $class();
 
-        $qtdParametros = (int)count(Helper::listParametersClassFunction($class, $func));
-
-        switch ($qtdParametros) {
-            case 0:
-                $class->{$func}();
-                break;
-            case 1:
-                call_user_func([$controller, $func], $requestBody);
-                break;
-            default:
-                call_user_func_array([$controller, $func], array_values($requestBody));
-                break;
-        }
+        return $controller->$func($requestBody);
     }
 }
 
