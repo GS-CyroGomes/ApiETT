@@ -8,9 +8,14 @@
         public $bodyRequest;
 
         public function __construct() {
-            $this->bodyRequest = json_decode(file_get_contents('php://input'));
-            var_dump($this->bodyRequest);
-            return $this->bodyRequest;
+            http_response_code(200);
+            // Define o cabeçalho para indicar que o conteúdo é JSON
+            header('Content-Type: application/json');
+            // Converte o array de dados para uma string JSON e a imprime
+            echo json_encode(json_decode(file_get_contents('php://input')));
+            // Garante que o script termine aqui
+            exit;
+            
             // $router = new Router();
             
             // // Grupo de rotas para usuários
