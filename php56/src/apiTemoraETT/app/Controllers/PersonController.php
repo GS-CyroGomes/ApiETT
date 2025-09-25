@@ -10,15 +10,11 @@ class PersonController
         $this->Person = new Person();
     }
 
-    public function index()
-    {
-        echo "PersonController";
-    }
-    
     public function register($arguments)
     {
         Helper::validateRequiredFields($arguments, ['nome', 'data_nascimento', 'rg', 'cpf', 'orgao_emissor', 'uf_emissor', 'senha']);        
-        $this->Person->cadastrar($arguments);
+        
+        // $this->Person->cadastrar($arguments);
         // Helper::finalizarRequisicao($arguments);
     }
 }

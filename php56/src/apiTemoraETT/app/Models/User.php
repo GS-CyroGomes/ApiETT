@@ -1,16 +1,43 @@
 <?
 namespace App\Models;
 use Config\Database;
+use App\Models\Person;
 
-class User
+class User extends Person
 {
     private $db;
-    public function __construct() {
-        // $this->db = Database::connect();
+
+    public function __construct() 
+    {
+        parent::__construct();
+        $this->db = new Database();
     }
 
-    public function cadastrar($arguments){
-        var_dump($arguments);
+    public function registerUser(
+        $nome, 
+        $dataNascimento, 
+        $rg, 
+        $cpf, 
+        $orgaoEmissor, 
+        $ufEmissor, 
+        $password
+    ){
+        $idPessoa = parent::registerPerson($nome, $dataNascimento, $rg, $cpf, $orgaoEmissor, $ufEmissor);
+        if ($idPessoa) {
+            return $this->db->insertWithEncrypted(
+                "usuario", 
+                [
+                    "id_pessoa" => $idPessoa, 
+                    "password" => $password,
+                ]
+            );
+        }
+        throw new \Exception("Erro ao cadastrar usuário");
+    }
+
+    public function getUser($id)
+    {
+
     }
 }
 ?>

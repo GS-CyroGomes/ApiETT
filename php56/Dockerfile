@@ -58,6 +58,7 @@ RUN touch /var/log/php_errors.log && \
 
 # Copia os arquivos de configuração
 COPY ./config/xdebug.ini /usr/local/etc/php/conf.d/
+COPY ./config/php.ini /usr/local/etc/php/php.ini
 COPY ./config/php.ini /usr/local/etc/php/conf.d/php.ini
 COPY ./config/apache2.conf /etc/apache2/apache2.conf
 COPY ./config/apiTemoraETT.conf /etc/apache2/sites-available/apiTemoraETT.conf

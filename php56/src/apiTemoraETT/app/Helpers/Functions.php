@@ -143,98 +143,16 @@ class Helper
     }
 
     /**
-     * Debug completo de qualquer variável
+     * Lista os parâmetros de uma função de uma classe
      */
-    public static function gD($data)
-    {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-        $file = $backtrace[0]['file'];
-        $line = $backtrace[0]['line'];
-
-        if (!is_object($data)) {
-            $json = [
-                'Path' => $file . " | line: " . $line,
-                'Type data' => gettype($data),
-                'data' => $data
-            ];
-        } else {
-            $class = get_class($data);
-            $json = [
-                'Path' => $file . " | line: " . $line,
-                'Class Name' => $class,
-                'Debug backtrace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),
-                'Method' => get_class_methods($class),
-                'Attributes' => (array)$data,
-                'Parent Extends' => get_parent_class($class) ?: 'Nenhuma',
-                'Type data' => gettype($data),
-                'Include files' => get_included_files(),
-                'Required files' => get_required_files()
-            ];
-        }
-
-        self::echoFormatted($json);
-    }
-
-    /**
-     * Detecta e corrige codificação de array/string para UTF-8
-     */
-    public static function corrigirCodificacaoArray($dados)
-    {
-        foreach ($dados as $chave => $valor) {
-            if (is_array($valor)) {
-                $dados[$chave] = self::corrigirCodificacaoArray($valor);
-            } elseif (is_string($valor)) {
-                if (!mb_detect_encoding($valor, 'UTF-8', true)) {
-                    $dados[$chave] = utf8_encode($valor);
-                } else {
-                    $dados[$chave] = mb_convert_encoding($valor, 'UTF-8', 'UTF-8');
-                }
-            }
-        }
-        return $dados;
-    }
-
-    /**
-     * Gera Base64 URL-safe
-     */
-    public static function base64Encode($string)
-    {
-        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($string));
-    }
-
-    /**
-     * Assina dados com chave privada
-     */
-    public static function signData($privateKey, $data, $hash = false)
-    {
-        if ($hash === true) {
-            $data = hash('sha256', $data, true);
-        }
-
-        openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA256);
-        return self::base64Encode($signature);
-    }
-
     public static function listParametersClassFunction($class, $function){
         $ref = new ReflectionMethod($class, $function);
         return $ref->getParameters();
     }
 
     /**
-     * Encripta e desencripta campos com AES
+     * Valida campos obrigatórios
      */
-    public static function encriptar($valorEncriptar)
-    {
-        $AESKEY = "TemoraETT";
-        return sprintf("HEX(AES_ENCRYPT('%s', '%s'))", $valorEncriptar, $AESKEY);
-    }
-
-    public static function desencriptar($nomeCampo)
-    {
-        $AESKEY = "TemoraETT";
-        return 'CAST(AES_DECRYPT(UNHEX(' . $nomeCampo . '),"' . $AESKEY . '") AS CHAR(150))';
-    }
-
     public static function validateRequiredFields($bodyRequest, $requiredArguments)
     {
         foreach ($requiredArguments as $value) {
@@ -245,5 +163,84 @@ class Helper
                 self::emitirErro("Argumento {$value} obrigatório não pode ser vazio ", 422);
             }
         }
+    }
+
+    public static function jweEncripty($payload)
+    {
+        $publicKeyPem = file_get_contents('../config/keys/public.pem');
+
+        $base64url = function ($data) {
+            return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+        };
+
+        if (is_array($payload)) {
+            $payload = json_encode($payload);
+        }
+        $aesKey = openssl_random_pseudo_bytes(32);
+        $iv = openssl_random_pseudo_bytes(16);
+        $cipherText = openssl_encrypt(
+            $payload,
+            'aes-256-cbc',
+            $aesKey,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+        $tag = hash_hmac('sha256', $cipherText, $aesKey, true);
+        $encryptedKey = '';
+        if (!openssl_public_encrypt($aesKey, $encryptedKey, $publicKeyPem, OPENSSL_PKCS1_OAEP_PADDING)) {
+            throw new Exception("Falha ao criptografar a chave AES com a chave pública RSA");
+        }
+
+        $header = [
+            'alg' => 'RSA-OAEP',
+            'enc' => 'A256CBC-HS256'
+        ];
+        return implode('.', [
+            $base64url(json_encode($header)),
+            $base64url($encryptedKey),
+            $base64url($iv),
+            $base64url($cipherText),
+            $base64url($tag)
+        ]);
+    }
+
+    /**
+     * Descriptografa um JWE
+     */
+    public static function jweDecripty($jwe)
+    {
+        $privateKeyPem = file_get_contents('../config/keys/private.pem');
+
+        $base64url = function ($data) {
+            return base64_decode(strtr($data, '-_', '+/'));
+        };
+
+        list($headerB64, $encryptedKeyB64, $ivB64, $cipherTextB64, $tagB64) = explode('.', $jwe);
+
+        $header = json_decode($base64url($headerB64), true);
+        $encryptedKey = $base64url($encryptedKeyB64);
+        $iv = $base64url($ivB64);
+        $cipherText = $base64url($cipherTextB64);
+        $tag = $base64url($tagB64);
+
+        $aesKey = '';
+        if (!openssl_private_decrypt($encryptedKey, $aesKey, $privateKeyPem, OPENSSL_PKCS1_OAEP_PADDING)) {
+            throw new Exception("Falha ao decriptar a chave AES com a chave privada RSA");
+        }
+        $calculatedTag = hash_hmac('sha256', $cipherText, $aesKey, true);
+        if (!hash_equals($calculatedTag, $tag)) {
+            throw new Exception("Falha na verificação de integridade (HMAC não confere)");
+        }
+
+        $payload = openssl_decrypt(
+            $cipherText,
+            'aes-256-cbc',
+            $aesKey,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+
+        $decoded = json_decode($payload, true);
+        return $decoded !== null ? $decoded : $payload;
     }
 }
