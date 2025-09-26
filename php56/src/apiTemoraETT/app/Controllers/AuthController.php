@@ -2,7 +2,6 @@
 namespace App\Controllers;
 
 use App\Helpers\Helper;
-use App\Models\Person;
 use App\Models\User;
 
 class AuthController
@@ -16,9 +15,19 @@ class AuthController
     public function login($arguments)
     {
         Helper::validateRequiredFields($arguments, ['cpf', 'senha']);
-        $this->User->getIdPersonByCpf($arguments['cpf']); 
+        $id = $this->User->getIdPersonByCpf($arguments['cpf']);
+        $userValid = $this->User->checkUserPassword($id, $arguments['senha']);
 
-        var_dump($arguments);
-        exit;
+        if ($userValid) {
+            $user = $this->User->getPersonById($id);
+            $jwe = Helper::jweEncripty($user);
+            Helper::finalizarRequisicao(["token" => $jwe]);
+        }
+        Helper::finalizarRequisicao(["message" => "Usuário ou senha inválidos"], "401 Unauthorized");
+    }
+
+    public function validateToken($arguments)
+    {
+        Helper::finalizarRequisicao("Token válido");
     }
 }

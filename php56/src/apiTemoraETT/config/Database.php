@@ -61,6 +61,55 @@ class Database
         if (count($result) > 1) { return $result; }
     }
 
+    public function selectWithDecrypted($tableAs = [], $columns = '*', $where = null, $bindParams = [])
+    {
+        $qb  = $this->connection->createQueryBuilder();
+        $key = getenv('AESKEY');
+        if (!$key) throw new \RuntimeException('AESKEY not set in environment');
+
+        $alias = !empty($tableAs) ? array_values($tableAs)[0] : null;
+
+        $pwdExpr = function() use ($alias) {
+            return ($alias ? $alias . '.password' : 'password');
+        };
+
+        if (is_array($columns)) {
+            $cols = [];
+            foreach ($columns as $c) {
+                if (preg_match('/(?:^|\.)password$/i', $c)) {
+                    $cols[] = "CAST(AES_DECRYPT(" . $pwdExpr() . ", :k) AS CHAR) AS password";
+                } else {
+                    $cols[] = $c;
+                }
+            }
+            $cols = implode(', ', $cols);
+        } else {
+            if ($columns === '*') {
+                $cols = ($alias ? $alias . '.*' : '*')
+                    . ', CAST(AES_DECRYPT(' . $pwdExpr() . ', :k) AS CHAR) AS password';
+            } else {
+                if (preg_match('/\bpassword\b/i', $columns)) {
+                    $columns = preg_replace('/\bpassword\b/i', "CAST(AES_DECRYPT(" . $pwdExpr() . ", :k) AS CHAR) AS password", $columns, 1);
+                }
+                $cols = $columns;
+            }
+        }
+        
+        $qb->select($cols);
+        foreach ($tableAs as $t => $a)
+            is_int($t) ? $qb->from($a) : $qb->from($t, $a);
+
+        if ($where) {
+            $qb->where($where);
+            foreach ($bindParams as $k => $v) $qb->setParameter($k, $v);
+        }
+
+        $qb->setParameter('k', $key);
+
+        $rows = $qb->execute()->fetchAll();
+        return !$rows ? null : (count($rows) === 1 ? $rows[0] : $rows);
+    }
+
     public function insert($table, $data)
     {
         $queryBuilder = $this->connection->createQueryBuilder();

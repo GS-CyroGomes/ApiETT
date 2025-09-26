@@ -35,9 +35,10 @@ class User extends Person
         throw new \Exception("Erro ao cadastrar usuário");
     }
 
-    public function getUser($id)
+    public function checkUserPassword($id, $password)
     {
-
+        $result = $this->db->selectWithDecrypted(["usuario"], "password", "id_pessoa = :id_person", ["id_person" => $id]);
+        return isset($result["password"]) ? true : false;
     }
 }
 ?>

@@ -22,10 +22,5 @@ class UserController
         $arguments['password'] = $arguments['senha'];
         unset($arguments['senha']);
         call_user_func_array([$this->User, 'registerUser'], $arguments);
-        // $jwe = Helper::jweEncripty($arguments);
-        // $arguments = Helper::jweDecripty($jwe);
-        // Helper::finalizarRequisicao($jwe);
-
-        // Helper::finalizarRequisicao($arguments);
     }
 }

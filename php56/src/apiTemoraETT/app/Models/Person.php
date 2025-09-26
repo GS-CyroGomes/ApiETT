@@ -50,10 +50,14 @@ class Person
     {
         $id = $this->issetCpf($cpf);
         if (!is_null($id)) {
-            $rs = $this->db->select(["usuario" => "u"], "*", "u.id_pessoa = :id_person", ["id_person" => $id]);
-            var_dump($rs);
-            exit;
+            $rs = $this->db->select(["usuario" => "u"], "u.id", "u.id_pessoa = :id_person", ["id_person" => $id]);
+            return $rs["id"];
         }
+    }
+
+    public function getPersonById($id)
+    {
+        return $this->db->select(["pessoa" => "p"], "p.nome, p.data_nascimento, p.rg, p.cpf, p.orgao_emissor, p.uf_emissor", "p.id = :id_person", ["id_person" => $id]);
     }
 }
 ?>

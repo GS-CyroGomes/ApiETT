@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `pessoa` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(255) NOT NULL,
   `data_nascimento` date NOT NULL,
-  `rg` varchar(9) NOT NULL,
+  `rg` varchar(10) NOT NULL,
   `cpf` varchar(11) NOT NULL,
   `orgao_emissor` varchar(100) NOT NULL,
   `uf_emissor` varchar(2) NOT NULL,
@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `id_pessoa` INT NOT NULL,
   `password` VARBINARY(255) NOT NULL,
+  `group` ENUM('admin', 'user') NOT NULL DEFAULT 'user',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -37,3 +38,15 @@ CREATE TABLE IF NOT EXISTS `usuario` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO pessoa
+    (nome, data_nascimento, rg, cpf, orgao_emissor, uf_emissor)
+VALUES
+    ('Cyro Matheus', '1996-08-02', '1606856995', '06262658513', 'SSP', 'BA');
+
+SET @pessoa_id = LAST_INSERT_ID();
+
+INSERT INTO usuario
+    (id_pessoa, password, user_group)
+VALUES
+    ( @pessoa_id, AES_ENCRYPT('SenhaSegura123', 'TemoraColetaETT'), "admin");
