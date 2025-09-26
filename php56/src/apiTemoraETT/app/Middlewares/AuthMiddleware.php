@@ -4,13 +4,10 @@ namespace App\Middlewares;
 require_once __DIR__ . '/../Helpers/Functions.php';
 use App\Helpers\Helper;
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-
 class AuthMiddleware {
 
     /**
-     * Valida JWT e retorna payload do usuário
+     * Valida JWE e retorna payload do usuário
      *
      * @return array
      */
@@ -29,11 +26,8 @@ class AuthMiddleware {
             Helper::emitirErro('Formato do token inválido. Use o formato Bearer.', "401 Unauthorized");
         }
 
-        $secretKey = 'SUA_CHAVE_SECRETA_AQUI'; // coloque sua chave secreta aqui
-
         try {
-            $decoded = JWT::decode($token, new Key($secretKey, 'HS256'));
-            return (array) $decoded;
+            return Helper::jweDecripty($token);
         } catch (\Exception $e) {
             Helper::emitirErro('Acesso negado: ' . $e->getMessage(), "403 Forbidden");
         }

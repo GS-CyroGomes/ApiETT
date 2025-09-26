@@ -2,6 +2,7 @@
 namespace App\Models;
 use Config\Database;
 use App\Models\Person;
+use App\Helpers\Helper;
 
 class User extends Person
 {
@@ -32,13 +33,19 @@ class User extends Person
                 ]
             );
         }
-        throw new \Exception("Erro ao cadastrar usuário");
+        Helper::emitirErro("Usuário já cadastrado", "409 Conflict");
     }
 
     public function checkUserPassword($id, $password)
     {
         $result = $this->db->selectWithDecrypted(["usuario"], "password", "id_pessoa = :id_person", ["id_person" => $id]);
         return isset($result["password"]) ? true : false;
+    }
+
+    public function getUserGroup($id)
+    {
+        $result = $this->db->select(["usuario" => "u"], "u.user_group", "u.id = :id_user", ["id_user" => $id]);
+        return isset($result["user_group"]) ? $result["user_group"] : null;
     }
 }
 ?>

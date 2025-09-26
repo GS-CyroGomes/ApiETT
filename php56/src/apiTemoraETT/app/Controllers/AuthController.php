@@ -20,6 +20,7 @@ class AuthController
 
         if ($userValid) {
             $user = $this->User->getPersonById($id);
+            $user['group'] = $this->User->getUserGroup($id);
             $jwe = Helper::jweEncripty($user);
             Helper::finalizarRequisicao(["token" => $jwe]);
         }

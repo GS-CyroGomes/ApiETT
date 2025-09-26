@@ -188,7 +188,7 @@ class Helper
         $tag = hash_hmac('sha256', $cipherText, $aesKey, true);
         $encryptedKey = '';
         if (!openssl_public_encrypt($aesKey, $encryptedKey, $publicKeyPem, OPENSSL_PKCS1_OAEP_PADDING)) {
-            throw new Exception("Falha ao criptografar a chave AES com a chave pública RSA");
+            Helper::emitirErro("Falha ao criptografar a chave AES com a chave pública RSA", "500 Internal Server Error");
         }
 
         $header = [
@@ -225,11 +225,11 @@ class Helper
 
         $aesKey = '';
         if (!openssl_private_decrypt($encryptedKey, $aesKey, $privateKeyPem, OPENSSL_PKCS1_OAEP_PADDING)) {
-            throw new Exception("Falha ao decriptar a chave AES com a chave privada RSA");
+            Helper::emitirErro("Falha ao decriptar a chave AES com a chave privada RSA", "500 Internal Server Error");
         }
         $calculatedTag = hash_hmac('sha256', $cipherText, $aesKey, true);
         if (!hash_equals($calculatedTag, $tag)) {
-            throw new Exception("Falha na verificação de integridade (HMAC não confere)");
+            Helper::emitirErro("Falha na verificação de integridade (HMAC não confere)", "500 Internal Server Error");
         }
 
         $payload = openssl_decrypt(

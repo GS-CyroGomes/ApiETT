@@ -65,7 +65,7 @@ class Database
     {
         $qb  = $this->connection->createQueryBuilder();
         $key = getenv('AESKEY');
-        if (!$key) throw new \RuntimeException('AESKEY not set in environment');
+        if (!$key) Helper::emitirErro('AESKEY not set in environment', '500 Internal Server Error');
 
         $alias = !empty($tableAs) ? array_values($tableAs)[0] : null;
 
@@ -125,7 +125,7 @@ class Database
     public function insertWithEncrypted($table, $data) 
     {
         if (!array_key_exists('password', $data)) {
-            throw new \Exception("Password is required");
+            Helper::emitirErro("Password is required", "500 Internal Server Error");
         }
         $queryBuilder = $this->connection->createQueryBuilder();
         $queryBuilder->insert($table);
