@@ -107,7 +107,10 @@ class Database
         $qb->setParameter('k', $key);
 
         $rows = $qb->execute()->fetchAll();
-        return !$rows ? null : (count($rows) === 1 ? $rows[0] : $rows);
+
+        $return = !$rows ? null : (count($rows) === 1 ? $rows[0]["password"] : $rows);
+
+        return $return;
     }
 
     public function insert($table, $data)

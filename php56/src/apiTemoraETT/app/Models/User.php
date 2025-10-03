@@ -36,10 +36,10 @@ class User extends Person
         Helper::emitirErro("Usuário já cadastrado", "409 Conflict");
     }
 
-    public function checkUserPassword($id, $password)
+    public function checkUserPassword($id, $requestedPassword)
     {
-        $result = $this->db->selectWithDecrypted(["usuario"], "password", "id_pessoa = :id_person", ["id_person" => $id]);
-        return isset($result["password"]) ? true : false;
+        $password = $this->db->selectWithDecrypted(["usuario"], "password", "id_pessoa = :id_person", ["id_person" => $id]);
+        return ($requestedPassword === $password)  ? true : false;
     }
 
     public function getUserGroup($id)
